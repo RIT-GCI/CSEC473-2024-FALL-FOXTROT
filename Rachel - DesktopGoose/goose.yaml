@@ -1,1 +1,41 @@
+---
+- name: Installing Desktop Goose and reinstalling if deleted 
+  hosts: all
+  tasks:
+    - name: Install Desktop Goose
+      win_file:
+        path: "C:\\DesktopGoose"
+        state: directory
+    - name: Download Desktop Goose ZIP
+      win_get_url:
+        url: "https://samperson.itch.io/desktop-goose?download"
+        dest: "C:\\DesktopGoose\\DesktopGoose.zip"
+        force: yes
 
+    - name: Unzip Desktop Goose
+      win_unzip:
+        src: "C:\\DesktopGoose\\DesktopGoose.zip"
+        dest: "C:\\DesktopGoose"
+        creates: "C:\\DesktopGoose\\DesktopGoose.exe"
+
+    - name: Run Desktop Goose
+      win_shell: |
+        Start-Process "C:\\DesktopGoose\\DesktopGoose.exe"
+      async: 10
+      poll: 0
+      
+    - name: Create a scheduled task to run every 5 minutes
+      win_scheduled_task:
+        name: "Restart Desktop Goose"
+        description: "Checks if Desktop Goose is running and restarts if necessary."
+        actions:
+          - path: "powershell.exe"
+            arguments: "-ExecutionPolicy Bypass -File C:\\DesktopGoose\\CheckDesktopGoose.ps1"
+        triggers:
+          - type: time
+            repetition:
+              interval: PT5M  # 5-minute interval
+              stop_at_duration_end: no
+        state: present
+        username: "SYSTEM"
+        run_level: highest
