@@ -1,6 +1,0 @@
-Install Python
-
-Windows
-Install packages
-  1.) pip install pynput
-  2.) pip install ctypes
