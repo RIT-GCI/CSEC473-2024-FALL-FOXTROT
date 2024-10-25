@@ -149,7 +149,8 @@ if __name__ == "__main__":
                 client_choice = input("> ")
                 try:
                     client_choice = int(client_choice) - 1
-                    select_client(client_ip)
+                    select_client(list(clients.keys())[client_choice])
+                    #select_client(clients[client_choice])
                 except (IndexError, ValueError):
                     print("Invalid choice.")
                     time.sleep(2)
