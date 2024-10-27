@@ -121,6 +121,14 @@ if __name__ == "__main__":
     server_thread = threading.Thread(target=run_server)
     server_thread.daemon = True
     server_thread.start()
+    clients["10.1.0.11"] = {'commands': [], 'interactive': False}
+    clients["10.1.0.12"] = {'commands': [], 'interactive': False}
+    clients["10.1.0.13"] = {'commands': [], 'interactive': False}
+    clients["10.1.0.14"] = {'commands': [], 'interactive': False}
+    clients["10.2.0.11"] = {'commands': [], 'interactive': False}
+    clients["10.2.0.12"] = {'commands': [], 'interactive': False}
+    clients["10.2.0.13"] = {'commands': [], 'interactive': False}
+    clients["10.2.0.14"] = {'commands': [], 'interactive': False}
 
     while True:
         os.system('clear')

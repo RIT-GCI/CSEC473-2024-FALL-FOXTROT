@@ -14,7 +14,7 @@ def save_file(file_name, file_content):
     with open(file_name, "wb") as file:
         file.write(file_content)
 
-server_url = "http://100.64.1.229:80"  # Replace <server_ip> with the actual IP of the server
+server_url = "http://10.70.0.68:80"  # Replace <server_ip> with the actual IP of the server
 backoff_time = 5
 
 headers = {
