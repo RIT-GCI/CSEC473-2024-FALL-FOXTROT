@@ -13,9 +13,9 @@ indexer_node_ingest: true
 indexer_start_timeout: 90
 
 indexer_cluster_nodes:
-  - 10.1.0.8
+  - 127.0.0.1
 indexer_discovery_nodes:
-  - 10.1.0.8
+  - 127.0.0.1
 
 local_certs_path: "{{ playbook_dir }}/indexer/certificates"
 
@@ -40,8 +40,8 @@ indexer_jvm_xms: null
 
 indexer_http_port: 9200
 
-indexer_admin_password: z00!
-dashboard_password: z00!
+indexer_admin_password: changeme
+dashboard_password: changeme
 
 # Deployment settings
 generate_certs: true
