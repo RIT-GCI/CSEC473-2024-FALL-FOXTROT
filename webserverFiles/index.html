@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seneca Park Zoo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #008080;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .gallery img {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        footer {
+            background-color: #008080;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Seneca Park Zoo</h1>
+        <p>Discover the amazing world of wildlife!</p>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>Our Animals</h2>
+            <div class="gallery">
+                <img src="animals\eagle.jpg" alt="Lion">
+                <img src="animals\platypus.jpeg" alt="Lion">
+                <img src="animals\dodoas.jpg" alt="Elephant">
+                <img src="animals\giraffe.png" alt="Giraffe">
+                <img src="animals\flamingo.jpg" alt="Zebra">
+                <img src="animals\elephant.jpg" alt="Tiger">
+                <img src="animals\monkey.jpg" alt="Monkey">
+                <img src="animals\tortoise.png" alt="Penguin">
+                <img src="animals\penquin.jpg" alt="Kangaroo">
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Seneca Park Zoo. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
